@@ -6,11 +6,11 @@ services:
         ports:
             - "8000:8000"
         volumes:
-            - ./models:/models
+            - ./model:/model
     spike-pipeline:
         image: spike-pipeline
         volumes:
-            - ./models:/models
+            - ./model:/model
             - ./pipeline/saved:/app/saved
             - ./pipeline/models:/app/models
     
