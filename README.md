@@ -143,6 +143,22 @@ que son el año y la fecha
 | `month`      | `int` | Mes para la predicción |    1     |
 
 
+Ejemplos de llamadas al API:
+
+```
+  http://localhost:8000/api/predict?year=2020&month=4
+```
+
+```
+  http://localhost:8000/api/predict?year=2015&month=4
+```
+
+```
+  http://localhost:8000/api/predict?year=2014&month=3
+```
+
+Las fechas deben ser entre Marzo 2014 y Abril 2020.
+
 
 
 ## Próximos pasos
