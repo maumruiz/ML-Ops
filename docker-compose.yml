@@ -1,0 +1,16 @@
+version: '1.0'
+
+services:
+    spike-api:
+        image: spike-api
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./models:/models
+    spike-pipeline:
+        image: spike-pipeline
+        volumes:
+            - ./models:/models
+            - ./pipeline/saved:/app/saved
+            - ./pipeline/models:/app/models
+    
