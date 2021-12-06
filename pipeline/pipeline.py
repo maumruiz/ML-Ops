@@ -33,7 +33,7 @@ def data_extract():
 # )
 
 scheduler = Schedule(
-    clocks=[DatesClock([pendulum.now().add(minutes=1)]), CronClock("0 0 * * 0")],
+    clocks=[DatesClock([pendulum.now().add(seconds=10)]), CronClock("0 0 * * 0")],
     )
 
 with Flow("spike-pipeline", schedule=scheduler) as flow:

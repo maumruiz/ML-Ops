@@ -122,7 +122,7 @@ en la carpeta model. Con estos archivos creados, ahora si podemos probar el api.
 Este endpoint se creó para asegurar que el api esta en correcto funcionamiento.
 Como respuesta se obtiene un mensaje de bienvenida.
 
-```http
+```
   GET /
 ```
 
@@ -133,7 +133,7 @@ Esta predicción se hace para alguna fecha que esté dentro de los datos recopil
 que ya tenemos localmente los features para hacer la predicción. Hay dos parámetros
 que son el año y la fecha
 
-```http
+```
   GET /api/predict/${year}/${month}
 ```
 
