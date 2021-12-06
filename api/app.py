@@ -10,8 +10,8 @@ def read_root():
 
 @app.get("/api/predict")
 def predict(year: int = 2020, month: int = 1):
-    model = joblib.load("/models/model.pkl")
-    feature_data = pd.read_csv('/models/feature_data.csv')
+    model = joblib.load("/model/model.pkl")
+    feature_data = pd.read_csv('/model/feature_data.csv')
 
     query = feature_data[(feature_data['ano'] == year) & (feature_data['mes'] == month)]
     if query.empty:
