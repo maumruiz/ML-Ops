@@ -24,6 +24,8 @@ Una vez separadas las tareas, crear el pipeline fué muy rápido con la
 interfaz gráfica de  Orchest, solo creando la tarea, asociando el código 
 y creando las relaciones del pipeline.
 
+![Pipeline](https://raw.githubusercontent.com/maumruiz/ml_challenge/main/pipeline.png?sanitize=true&raw=true)
+
 Para acceder al proyecto se puede entrar al siguiente link usando el usuario y 
 contraseña que agregué en los comentarios del google form: 
 ```https://desafio-spike-1d525d52.orchestapp.io/```
