@@ -11,20 +11,45 @@ Mi forma de abordar el problema fué la siguiente.
 
 ### Pipeline
 
-Empecé por dar solución al proceso de pipeline para el código que se nos proporcionó.
-Para esto mi primer solución fue crear el pipeline con la plataforma de [Orchest](https://docs.prefect.io/). 
-Esta herramienta la encontré en un blog del Linkedin de Spike, y pienso que es una
-herramienta demasiado buena porque es muy sencillo crear pipelines para ejecutar código
-de python o jupyter notebooks y crear schedulers para los pipelines, entre otras cosas...
+Empecé por dar solución al proceso de pipeline para el código que se nos proporcionó. 
+Separé el código que existe en 6 diferentes tareas:
 
-Separé el código que existe en 4 diferentes tareas: 1) Obtención de datos,
- 2) Limpieza de datos, 3) Pre-procesamiento y 4) Entrenamiento del modelo.
+1\) Obtención de datos: En este caso se leen los datos desde archivos csv, 
+pero aqui podríamos estar obteniendo datos en tiempo real. Probablemente se necesiten
+estar actualizando los datos de precios de la leche, variables climatologicas
+y macroeconomicas.
 
-Una vez separadas las tareas, crear el pipeline fué muy rápido con la
-interfaz gráfica de  Orchest, solo creando la tarea, asociando el código 
-y creando las relaciones del pipeline.
+2\) Limpieza de datos: En este paso se limpian todos los datos de variables climatológicas,
+variables macroeconómicas y se hace un merge de las 3 fuentes de datos para quedarse con
+los features seleccionados para el entrenamiento.
+
+3\) Visualización de datos: Este paso se agrega para monitorear los datos que se limpiaron
+en el paso anterior. Se pueden visualizar los datos de precipitaciones y del banco central
+a través del tiempo para ciertas regiones y, más importante, se podrían visualizar si hay
+outliers en los datos.
+
+4\) Pre-procesamiento: Este paso es dedicado para el pre-procesamiento necesario para
+entrenar el algoritmo de regresión. En este caso sólo se separan los datos de entrenamiento
+y pruebas, pero se pueden escalar datos, normalizar, etc.
+
+5\) Entrenamiento del modelo: En este paso se entrena un modelo de Ridge Regression para la
+predicción del precio de la leche. Se usa GridSearch para buscar los mejores parámetros.
+
+6\) Monitoreo. Este paso es para monitorear los resultados y comportamiento del modelo. Se
+deben poder visualizar las métricas obtenidas de nuevos modelos, así como diferentes
+gráficas útiles para entender el comportamiento.
 
 ![Pipeline](https://raw.githubusercontent.com/maumruiz/ml_challenge/main/pipeline.png?sanitize=true&raw=true)
+
+Para la implementación, mi primer solución fue crear el pipeline con la plataforma de 
+[Orchest](https://docs.prefect.io/).  Esta herramienta la encontré en un blog del Linkedin
+de Spike, y pienso que es una herramienta demasiado buena porque es muy sencillo crear 
+pipelines para ejecutar código de python o jupyter notebooks y crear schedulers para
+los pipelines, entre otras cosas...
+
+Una vez separadas las tareas, crear el pipeline fué muy rápido con la
+interfaz gráfica de  Orchest, sólo creando cada tarea, asociando el código 
+y creando las relaciones del pipeline.
 
 Para acceder al proyecto se puede entrar al siguiente link usando el usuario y 
 contraseña que agregué en los comentarios del google form: 
@@ -38,21 +63,47 @@ preferí hacer el pipeline manual con código para tener más flexibilidad en la
 del deploy para usarlo en la API.
 
 Por lo tanto, mi segunda solución fue usar [Prefect](https://docs.prefect.io/). Esta herramienta
-también es fácil de usar para hacer pipelines mediante código, y permite también correr
+también es fácil de usar para hacer pipelines mediante código, y permite correr
 jupyter notebooks. Las moddificaciones que tuve que hacer en los archivos fueron mínimas, pero
-tiene algunas diferencias con Orchest: Primero en Orchest es mucho más sencillo crear los pipelines
-y modificar los archivos con su ambiente virtual. Segundo, los inputs y outputs de orchest
-no son tan sencillos como en Prefect. Para Orchest basta con llamar una funcion de la librería
+tiene algunas diferencias con Orchest: Primero, en Orchest es mucho más sencillo crear los pipelines
+y modificar los archivos con su ambiente virtual. Segundo, la comunicación de inputs y outputs son
+es muy sencilla en Orchest y en Prefect no. Para Orchest basta con llamar una funcion de la librería
 para comunicar datos a través del pipeline. Con Prefect tuve que guardar archivos temporales
 para lograr esta comunicación.
 
+Por último, este pipeline se ejecuta al momento de correr y tiene un scheduler con un cron job
+para estar ejecutando el pipeline todos los domingos. Para esto asumí la perioricidad para
+el pipeline, pero sería cosa de revisar cada cuánto podemos actualizar datos y también del
+cliente.
+
 ### API
 
-Para crear el API utilicé FastAPI. Esta parte fué más rapida que el pipeline ya que sólo
-había que exponer un endpoint para la predicción. Por cómo se desarrolló el código y los datos,
-me tomé la libertad de asumir que la predicción sería basada en un mes y año, y sólo se podría
-predecir para alguna fecha en la que tengamos sus features. Por lo tanto, el API pide como
-parámetros el mes y el año para regresar una predicción.
+Para crear el API habían un par de cosas que tuve que asumir para el diseño.
+
+Primero, la obtención del modelo podría ser usando siempre la última versión, o ir
+actualizando manualmente la versión a utilizar para que primero se verifique que un
+modelo actualizado esté funcionando adecuadamente. Aquí decidí usar siempre la última version
+del modelo entrenado. 
+
+Segundo, cómo va a funcionar el endpoint de la predicción. Por cómo se realizó el modelo,
+se pueden hacer predicciones para cierto mes y año. Asumo que las predicciones se requieren
+para un mes próximo o hasta una ventana de meses próximos (no tiene caso hacer predicciones
+para meses anteriores). Sin embargo, para hacer la predicción
+se necesitan los features de las variables de precipitaciones y banco central, entonces
+sólo podemos hacer las predicciones para los meses en los que tenemos estos features.
+Por lo tanto, mi solución es guardar los features al momento de limpiar los datos y ponerlos
+disponibles para usarlos en el API. El endpoint de la predicción recibe una fecha (mes y año),
+revisa si tiene los features y con esto hacer la predicción si hay datos disponibles.
+
+Esto podría mejorar si se pudieran obtener los features en tiempo real para no limitarnos
+solamente a los que se tienen disponibles por el momento. También, el modelo debería
+poder hacer un time series forecasting, para tener los valores esperados para futuros 
+meses, que son los que muy probablemente son los valores que se necesitan.
+
+Para implementar el API utilicé FastAPI. Esta parte fué más rapida que el pipeline ya que 
+sólo había que exponer un endpoint para la predicción. El API pide como parámetros el mes
+y el año para regresar una predicción. En caso de no tener datos para la predicción, nos
+regresa una respuesta de datos insuficientes.
 
 ### Servicios
 
@@ -61,10 +112,53 @@ cada uno de ellos para tener dos servicios independientes. El contenedor del Pip
 entrenará el modelo cada cierto tiempo y lo guarda para que el API use la ultima version
 disponible para hacer predicciones.
 
-El deploy de estos servicios se logra más facil ya que los contenedores de Docker tienen
+El deploy de estos servicios se logra más fácil ya que los contenedores de Docker tienen
 la información necesaria para replicar los resultados en cualquier servidor.
 
 
+### Monitoreo
+
+Por último, es necesario estar monitoreando todo el proceso para verificar que todo se
+esté comportando como se espera. Agregué un paso de monitoreo para visualizar los resultados
+de las nuevas versiones del modelo, incluyendo las métricas de RMSE y R2.
+
+Para implementar esto usé la pataforma de [Weights & Biases](https://wandb.ai/) y creé un
+proyecto en el que se pueden loggear estadísticas en tiempo real.
+
+Para visualizar el monitoreo se puede entrar a este [link](https://wandb.ai/maumruiz/spike-monitoring).
+Dentro de este servicio, podemos ver en la barra lateral todas las ejecuciones del pipeline,
+con fecha y hora. Cada una tiene registradas sus métricas y gráficas. En la parte principal
+se puede ver el conjunto de métricas registradas para visualizar cómo han ido cambiando
+con el tiempo, con nuevas versiones del modelo.
+## Estructura del código
+
+El código está organizado de la siguiente manera:
+
+    .
+    ├── api                     # Carpeta para el api
+    ├── pipeline                # Carpeta para el pipeline
+    │   ├── data                # Datos para el modelo
+    │   ├── logs                # Logs de resultados de notebooks
+    │   ├── models              # Todos los modelos entrenados
+    │   ├── tasks               # Tareas del pipeline (notebooks)
+    │   └── tmp                 # Archivos temporales
+    └── model                   # Último modelo para producción
+
+
+La carpeta de api contiene la aplicación para exponer un edpoint para consumir predicciones
+del modelo.
+
+La carpeta de model contiene la última versión del modelo y los features para las predicciones.
+
+La carpeta de pipeline contiene todos los pasos del pipeline, y se divide en más carpetas.
+"data" contiene los datos proporcionados para el challenge, pero los datos se podrían estar
+obteniendo de alguna base de datos. "logs" contiene los outputs de los jupyter notebooks de
+la última ejecución del pipeline. Estos pueden ser revisados en caso de haber un error o
+para monitoreo general del pipeline. "models" es la carpeta donde se guardan todas las versiones
+de los modelos entrenados, con la fecha de creación en el nombre del archivo. "tasks" contiene
+los archivos de las tareas del pipeline, separados en distintos jupyter notebooks o scripts
+de python. "tmp" contiene archivos que se usan para la comunicación entre tareas del pipeline.
+Estos archivos se podrían borrar al terminar el pipelione, pero por ahora los estoy dejando ahí.
 
 ## Pasos para ejecutar localmente
 
@@ -161,21 +255,17 @@ Ejemplos de llamadas al API:
 
 Las fechas deben ser entre Marzo 2014 y Abril 2020.
 
-
-
 ## Próximos pasos
 
 Debido al poco tiempo que hay para este desafío, se dejan pendiente 
 muchas mejoras al proceso. Algunas de estas son:
 
 
-- El API no tiene optimizada la carga del modelo. Actualmente cada que se hace una llamada al API, se carga el último modelo existente. Esto podría mejorar cargando en caché el modelo, y en la llamada de la API checar si la versión del caché es la última existente, para no tener que cargar de nuevo el modelo.
-- Investigar sobre cómo podría hacer un deploy del modelo desde Orchest para poder usarlo en la API automáticamente.
+- Mandar correo o notificacion cuando falle el pipeline
 - Investigar más sobre los pipelines con Prefect para optimizar la comunicación de datos entre tasks.
 - Hacer un deploy a producción de los dos servicios con alguna plataforma como Heroku.
-- Monitorear los resultados del pipeline de entrenamiento.
-
-
+- El API no tiene optimizada la carga del modelo. Actualmente cada que se hace una llamada al API, se carga el último modelo existente. Esto podría mejorar cargando en caché el modelo, y en la llamada de la API checar si la versión del caché es la última existente, para no tener que cargar de nuevo el modelo.
+- Investigar sobre cómo podría hacer un deploy del modelo desde Orchest para poder usarlo en la API automáticamente.
 ## Conclusión
 
 En este desafío se crearon dos micro servicios, uno para un pipeline de entrenamiento 
