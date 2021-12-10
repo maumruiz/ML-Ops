@@ -15,15 +15,19 @@ logger = prefect.context.get("logger")
 
 @task(max_retries=3, retry_delay=timedelta(seconds=30), trigger=all_successful)
 def data_wrangling(task_input):
-    ExecuteNotebook(path='tasks/data_wrangling.ipynb', output_path='saved/out_data_wrangling.ipynb', kernel_name='python3').run()
+    ExecuteNotebook(path='tasks/data_wrangling.ipynb', output_path='logs/out_data_wrangling.ipynb', kernel_name='python3').run()
+
+@task(max_retries=3, retry_delay=timedelta(seconds=30), trigger=all_successful)
+def data_visualization(task_input):
+    ExecuteNotebook(path='tasks/data_visualization.ipynb', output_path='logs/out_data_visualization.ipynb', kernel_name='python3').run()
 
 @task(max_retries=3, retry_delay=timedelta(seconds=30), trigger=all_successful)
 def pre_processing(task_input):
-    ExecuteNotebook(path='tasks/pre_processing.ipynb', output_path='saved/out_pre_processing.ipynb', kernel_name='python3').run()
+    ExecuteNotebook(path='tasks/pre_processing.ipynb', output_path='logs/out_pre_processing.ipynb', kernel_name='python3').run()
 
 @task(max_retries=3, retry_delay=timedelta(seconds=30), trigger=all_successful)
 def model_training(task_input):
-    ExecuteNotebook(path='tasks/model_training.ipynb', output_path='saved/out_model_training.ipynb', kernel_name='python3').run()
+    ExecuteNotebook(path='tasks/model_training.ipynb', output_path='logs/out_model_training.ipynb', kernel_name='python3').run()
 
 
 @task
@@ -40,7 +44,8 @@ scheduler = Schedule(
 with Flow("spike-pipeline", schedule=scheduler) as flow:
     out1 = data_extract()
     out2 = data_wrangling(task_input=out1)
-    out3 = pre_processing(task_input=out2)
-    out4 = model_training(task_input=out3)
+    out3_1 = pre_processing(task_input=out2)
+    out3_2 = data_visualization(task_input=out2)
+    out4 = model_training(task_input=out3_1)
 
 flow.run()

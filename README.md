@@ -174,6 +174,8 @@ muchas mejoras al proceso. Algunas de estas son:
 - Investigar más sobre los pipelines con Prefect para optimizar la comunicación de datos entre tasks.
 - Hacer un deploy a producción de los dos servicios con alguna plataforma como Heroku.
 - Monitorear los resultados del pipeline de entrenamiento.
+
+
 ## Conclusión
 
 En este desafío se crearon dos micro servicios, uno para un pipeline de entrenamiento 

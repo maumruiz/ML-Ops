@@ -7,10 +7,12 @@ import pandas as pd
 
 
 def obtain_data():
+    # Obtener datos en tiempo real??
     precipitaciones = pd.read_csv('./data/precipitaciones.csv')
     banco_central = pd.read_csv('./data/banco_central.csv')
     precio_leche = pd.read_csv('./data/precio_leche.csv')
 
-    precipitaciones.to_pickle('saved/precipitaciones.pkl')
-    banco_central.to_pickle('saved/banco_central.pkl')
-    precio_leche.to_pickle('saved/precio_leche.pkl')
+    # Guardarlos en archivos temporales
+    precipitaciones.to_pickle('tmp/precipitaciones.pkl')
+    banco_central.to_pickle('tmp/banco_central.pkl')
+    precio_leche.to_pickle('tmp/precio_leche.pkl')

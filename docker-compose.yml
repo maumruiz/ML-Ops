@@ -11,6 +11,7 @@ services:
         image: spike-pipeline
         volumes:
             - ./model:/model
-            - ./pipeline/saved:/app/saved
+            - ./pipeline/logs:/app/logs
+            - ./pipeline/tmp:/app/tmpwandb
             - ./pipeline/models:/app/models
     
