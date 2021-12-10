@@ -130,6 +130,8 @@ Dentro de este servicio, podemos ver en la barra lateral todas las ejecuciones d
 con fecha y hora. Cada una tiene registradas sus métricas y gráficas. En la parte principal
 se puede ver el conjunto de métricas registradas para visualizar cómo han ido cambiando
 con el tiempo, con nuevas versiones del modelo.
+
+![Monitoreo](https://raw.githubusercontent.com/maumruiz/ml_challenge/main/wandb.png?sanitize=true&raw=true)
 ## Estructura del código
 
 El código está organizado de la siguiente manera:
