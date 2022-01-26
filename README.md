@@ -1,5 +1,5 @@
 
-# Spike - Desafío ML Engineer
+# Desafío ML Engineer
 
 Este repositorio contiene el código para crear un pipeline de entrenamiento de un modelo
 para predecir el precio de la leche y crear un API para usar el modelo entrenado.
@@ -7,12 +7,9 @@ para predecir el precio de la leche y crear un API para usar el modelo entrenado
 
 ## Detalles del proceso
 
-Mi forma de abordar el problema fué la siguiente.
-
 ### Pipeline
 
-Empecé por dar solución al proceso de pipeline para el código que se nos proporcionó. 
-Separé el código que existe en 6 diferentes tareas:
+El código esta separado en 6 diferentes tareas:
 
 1\) Obtención de datos: En este caso se leen los datos desde archivos csv, 
 pero aqui podríamos estar obteniendo datos en tiempo real. Probablemente se necesiten
@@ -42,8 +39,7 @@ gráficas útiles para entender el comportamiento.
 ![Pipeline](https://raw.githubusercontent.com/maumruiz/ml_challenge/main/pipeline.png?sanitize=true&raw=true)
 
 Para la implementación, mi primer solución fue crear el pipeline con la plataforma de 
-[Orchest](https://docs.prefect.io/).  Esta herramienta la encontré en un blog del Linkedin
-de Spike, y pienso que es una herramienta demasiado buena porque es muy sencillo crear 
+[Orchest](https://docs.prefect.io/).  Es una herramienta demasiado buena porque es muy sencillo crear 
 pipelines para ejecutar código de python o jupyter notebooks y crear schedulers para
 los pipelines, entre otras cosas...
 
@@ -51,18 +47,7 @@ Una vez separadas las tareas, crear el pipeline fué muy rápido con la
 interfaz gráfica de  Orchest, sólo creando cada tarea, asociando el código 
 y creando las relaciones del pipeline.
 
-Para acceder al proyecto se puede entrar al siguiente link usando el usuario y 
-contraseña que agregué en los comentarios del google form: 
-```https://desafio-spike-1d525d52.orchestapp.io/```
-
-Yo no había usando antes Orchest, por lo que al momento de querer crear el API desde 
-ahí me di cuenta que no era tan sencillo. No hay mucha documentación y es una herramienta
-reciente en evolución. Me topé con el problema de que no iba a ser fácil automatizar el
-entrenamiento continuo del modelo y usarlo en una API. Dado el limitado tiempo de 5 horas,
-preferí hacer el pipeline manual con código para tener más flexibilidad en la automatización
-del deploy para usarlo en la API.
-
-Por lo tanto, mi segunda solución fue usar [Prefect](https://docs.prefect.io/). Esta herramienta
+La segunda solución es usando [Prefect](https://docs.prefect.io/). Esta herramienta
 también es fácil de usar para hacer pipelines mediante código, y permite correr
 jupyter notebooks. Las moddificaciones que tuve que hacer en los archivos fueron mínimas, pero
 tiene algunas diferencias con Orchest: Primero, en Orchest es mucho más sencillo crear los pipelines
@@ -259,8 +244,7 @@ Las fechas deben ser entre Marzo 2014 y Abril 2020.
 
 ## Próximos pasos
 
-Debido al poco tiempo que hay para este desafío, se dejan pendiente 
-muchas mejoras al proceso. Algunas de estas son:
+Se dejan pendiente muchas mejoras al proceso. Algunas de estas son:
 
 
 - Mandar correo o notificacion cuando falle el pipeline
@@ -277,5 +261,4 @@ fácilmente todo lo que se va entrenando, pero para usarlo tendría que estar mo
 manualmente los modelos entrenados a los archivos del API. Por esta razón me vi en la necesidad
 de usar otro método para el pipeline, con el fin de tener todo completamente automatizado.
 El código desarrollado es fácil de ejecutar y se estima que sea fácil de hacer deploy a producción.
-Queda pendiente agregar mejoras y optimizar algunas cosas pero con el límite de tiempo se logró
-lo necesario para cumplir el desafío.
+Queda pendiente agregar mejoras y optimizar algunas cosas.
